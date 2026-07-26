@@ -10,6 +10,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///frota2.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# BLOQUEIO GLOBAL DE SEGURANÇA (EXIGE LOGIN)
+@app.before_request
+def exigir_login():
+    rotas_livres = ['login', 'static']
+    if request.endpoint and request.endpoint not in rotas_livres and 'usuario_admin' not in session:
+        return redirect(url_for('login'))
+
 # CONFIGURAÇÕES DE UPLOAD
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -256,7 +263,6 @@ def login():
             return redirect(url_for('index'))
         flash('Credenciais administrativas incorretas.', 'danger')
     return render_template('login.html', tema=session.get('tema', 'claro'))
-
 
 @app.route('/alternar_tema')
 def alternar_tema():
