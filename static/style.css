@@ -954,8 +954,10 @@ body.dark-mode .card small{
 }
 
 /* ===========================================================
-   RESPONSIVIDADE PARA CELULARES (TELA DE LOGIN)
+   RESPONSIVIDADE COMPLETA PARA CELULARES
 =========================================================== */
+
+/* 1. Ajuste para a Tela de Login */
 @media (max-width: 768px) {
     .login-page {
         flex-direction: column;
@@ -968,11 +970,36 @@ body.dark-mode .card small{
     }
 
     .login-right {
-        display: none; /* Oculta a imagem pesada no celular para focar no login limpo */
+        display: none;
     }
 
     .login-box {
         width: 100%;
         max-width: 400px;
+    }
+}
+
+/* 2. Ajuste para o Painel Interno (Sidebar e Conteúdo) */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        box-shadow: none;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
     }
 }
