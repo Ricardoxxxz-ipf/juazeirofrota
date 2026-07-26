@@ -10,12 +10,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///frota2.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+
 # BLOQUEIO GLOBAL DE SEGURANÇA (EXIGE LOGIN)
 @app.before_request
 def exigir_login():
     rotas_livres = ['login', 'static']
-    if request.endpoint and request.endpoint not in rotas_livres and 'usuario_admin' not in session:
+    # Liberamos também rotas que comecem com '/posto' caso queira acessar rotas internas do posto livremente se logado
+    if request.endpoint and request.endpoint not in rotas_livres and 'usuario_admin' not in session and 'usuario_posto' not in session:
         return redirect(url_for('login'))
+
 
 # CONFIGURAÇÕES DE UPLOAD
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
@@ -233,7 +236,7 @@ def index():
     for sec in secretarias:
         abast_sec = [a for a in abastecimentos if getattr(a, 'secretaria', '') == sec]
         soma_combustivel = sum([a.valor_total for a in abast_sec if a and a.valor_total])
-        qtd_abast = len(abast_sec)  # <--- Quantidade de abastecimentos
+        qtd_abast = len(abast_sec)
 
         os_sec = [o for o in ordens_servico if getattr(o, 'secretaria', '') == sec]
         soma_os = sum([o.valor for o in os_sec if o and o.valor])
@@ -241,7 +244,7 @@ def index():
 
         resumo_secretarias[sec] = {
             'combustivel': f"R$ {soma_combustivel:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
-            'qtd_abast': qtd_abast,  # <--- Enviando para o HTML
+            'qtd_abast': qtd_abast,
             'valor_os': f"R$ {soma_os:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'),
             'os_ativas': qtd_os
         }
@@ -258,17 +261,27 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form.get('usuario') == 'ricardo' and request.form.get('senha') == '777':
+        usuario = request.form.get('usuario')
+        senha = request.form.get('senha')
+
+        # Login Administrativo
+        if usuario == 'ricardo' and senha == '777':
             session['usuario_admin'] = 'admin'
             return redirect(url_for('index'))
-        flash('Credenciais administrativas incorretas.', 'danger')
+
+        # Login do Posto unificado na mesma tela principal
+        elif usuario == 'parente' and senha == '993304':
+            session['usuario_posto'] = 'posto'
+            return redirect(url_for('lancar_abastecimento'))
+
+        flash('Credenciais incorretas.', 'danger')
     return render_template('login.html', tema=session.get('tema', 'claro'))
+
 
 @app.route('/alternar_tema')
 def alternar_tema():
-    session['tema'] = 'dark' if session.get('tema') != 'dark' else 'claro'
+    session['tema'] = 'dark' if session.get('tema') != 'dark' else 'light'
     return redirect(request.referrer or url_for('index'))
-
 
 @app.route('/veiculos')
 def veiculos():
@@ -626,19 +639,10 @@ def imprimir_faturamento_os(secretaria):
 # PORTAL DO POSTO CONVENIADO (OPERAÇÕES E ESTORNO)
 # ==============================================================================
 
-@app.route('/posto/login', methods=['GET', 'POST'])
-def login_posto():
-    if request.method == 'POST':
-        if request.form.get('usuario') == 'parente' and request.form.get('senha') == '993304':
-            session['usuario_posto'] = 'posto'
-            return redirect(url_for('lancar_abastecimento'))
-        flash('Credenciais de Posto incorretas.', 'danger')
-    return render_template('login_posto.html')
-
-
 @app.route('/posto/abastecer', methods=['GET', 'POST'])
 def lancar_abastecimento():
-    if 'usuario_posto' not in session: return redirect(url_for('login_posto'))
+    if 'usuario_posto' not in session and 'usuario_admin' not in session:
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         string_veiculo = request.form.get('veiculo', '')
@@ -691,15 +695,8 @@ def lancar_abastecimento():
 
     veic_list = [f"{v.modelo} ({v.placa}) - {v.secretaria}" for v in
                  db.session.scalars(db.select(Veiculo).filter_by(status='Ativo')).all()]
-    mot_list = [m.nome for m in db.session.scalars(db.select(Motorista).order_by(Motorista.nome.asc())).all()]
-    precos = {p.combustivel: p.preco_litro for p in db.session.scalars(db.select(ConfigPreco)).all()}
-    ultimos = db.session.scalars(db.select(Abastecimento).order_by(Abastecimento.id.desc()).limit(10)).all()
 
-    return render_template('posto_abastecer.html',
-                           veiculos=veic_list if veic_list else ['Nenhum veículo ativo'],
-                           motoristas=mot_list if mot_list else ['Samuel Galvão'],
-                           precos=precos,
-                           historico=ultimos)
+    return render_template('lancar_abastecimento.html', veiculos=veic_list)
 
 
 @app.route('/posto/nota/<int:id>')
