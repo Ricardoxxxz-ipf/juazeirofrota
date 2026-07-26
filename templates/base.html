@@ -184,14 +184,14 @@
             </p>
         </div>
 
-        <div> style="display:flex;align-items:center;gap:15px;">
+        <div style="display:flex;align-items:center;gap:15px;">
             <div style="text-align:right;">
                 <strong>Administrador</strong>
                 <br>
                 <small>{{ session.get('usuario_admin','Usuário') }}</small>
             </div>
 
-            <a> href="{{ url_for('alternar_tema') }}" class="btn-tema">
+            <a href="{{ url_for('alternar_tema') }}" class="btn-tema">
                 {% if tema == 'dark' %}
                     ☀️ Modo Claro
                 {% else %}
