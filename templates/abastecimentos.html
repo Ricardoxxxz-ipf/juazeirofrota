@@ -42,7 +42,7 @@
             <tbody>
                 {% for item in historico %}
 
-                <tr> style="{% if item.status == 'Estornado' %}color: #94a3b8; background-color: #f8fafc; font-style: italic;{% endif %}">
+                <tr style="{% if item.status == 'Estornado' %}color: #94a3b8; background-color: #f8fafc; font-style: italic;{% endif %}">
                     <td><strong>#{{ "%04d" | format(item.id) }}</strong></td>
 
                     <td>
