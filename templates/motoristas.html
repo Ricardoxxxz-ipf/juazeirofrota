@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="topbar">
+    <div>
+        <h1>👤 Gestão de Motoristas</h1>
+        <p>Cadastre e gerencie os condutores autorizados da frota municipal.</p>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+
+    <div class="form-cadastro" style="margin-top: 0; background: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <h2>📝 Cadastrar Motorista</h2>
+        <p style="color: #94a3b8; font-size: 0.9em; margin-bottom: 20px;">Insira os dados do novo condutor.</p>
+
+        <form method="POST" action="{{ url_for('cadastrar_motorista') }}">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom:5px;">Nome Completo</label>
+                <input type="text" name="nome" placeholder="Ex: Samuel Galvão" required
+                       style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-color); box-sizing: border-box;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom:5px;">CPF</label>
+                <input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required
+                       style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-color); box-sizing: border-box;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display:block; margin-bottom:5px;">Categoria CNH</label>
+                <input type="text" name="cnh" placeholder="Ex: A/B, D, E" required
+                       style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-color); box-sizing: border-box;">
+            </div>
+
+            <button type="submit" class="btn-salvar" style="width: 100%; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer;">
+                💾 Gravar Motorista
+            </button>
+        </form>
+    </div>
+
+    <div class="tabela" style="margin-top: 0;">
+        <h2>📋 Motoristas Cadastrados</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Categoria CNH</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for motorista in motoristas %}
+                    <tr>
+                        <td><strong>{{ motorista.nome }}</strong></td>
+                        <td>{{ motorista.cpf }}</td>
+                        <td>
+                            <span class="badge bg-secondary" style="background:#475569; color:#fff; padding:4px 8px; border-radius:4px; font-weight: bold;">
+                                {{ motorista.cnh }}
+                            </span>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align:center;padding:40px;color:#94a3b8;">
+                            Nenhum motorista cadastrado ainda.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.getElementById('cpf').addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+
+    value = value.replace(/^(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+    value = value.replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+
+    e.target.value = value;
+});
+</script>
+
+{% endblock %}

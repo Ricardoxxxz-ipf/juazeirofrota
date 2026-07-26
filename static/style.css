@@ -1,0 +1,954 @@
+/* ==========================================================================
+   SISTEMA DE GESTÃO DE FROTAS
+   Prefeitura Municipal de Juazeiro do Piauí
+   Versão 3.0
+========================================================================== */
+
+/* =========================
+   RESET
+========================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    background:#eef3f8;
+    color:#1f2937;
+    transition:.3s;
+}
+
+/* =========================
+   VARIÁVEIS
+========================= */
+
+:root{
+
+    --azul:#2563eb;
+    --azul-hover:#1d4ed8;
+
+    --verde:#16a34a;
+    --verde-hover:#15803d;
+
+    --vermelho:#dc2626;
+    --amarelo:#f59e0b;
+
+    --cinza:#64748b;
+
+    --card:#ffffff;
+
+    --sidebar:#0f172a;
+
+    --topbar:#ffffff;
+
+    --borda:#dbe4ee;
+
+    --shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+    width:260px;
+
+    height:100vh;
+
+    background:linear-gradient(180deg,#0f172a,#172554);
+
+    color:white;
+
+    overflow:auto;
+
+    box-shadow:8px 0 25px rgba(0,0,0,.18);
+
+    z-index:1000;
+
+}
+
+.logo{
+
+    padding:35px 20px;
+
+    text-align:center;
+
+    font-size:28px;
+
+    font-weight:800;
+
+    letter-spacing:1px;
+
+    color:white;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+}
+
+.menu{
+
+    padding:18px;
+
+}
+
+.menu a{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    text-decoration:none;
+
+    color:#d6deea;
+
+    padding:15px 18px;
+
+    margin-bottom:10px;
+
+    border-radius:12px;
+
+    transition:.25s;
+
+    font-weight:600;
+
+}
+
+.menu a:hover{
+
+    background:rgba(255,255,255,.08);
+
+    color:white;
+
+    transform:translateX(6px);
+
+}
+
+.menu a.active{
+
+    background:linear-gradient(90deg,#2563eb,#3b82f6);
+
+    color:white;
+
+    box-shadow:0 10px 25px rgba(37,99,235,.35);
+
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.main{
+
+    margin-left:260px;
+
+    padding:35px;
+
+    min-height:100vh;
+
+}
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+
+    background:var(--topbar);
+    border-radius:18px;
+    padding:28px;
+    margin-bottom:25px;
+    box-shadow:var(--shadow);
+}
+
+.topbar > div:first-child{
+    flex:1;
+}
+
+.topbar h1,
+.topbar h2{
+
+    font-size:30px;
+
+    margin-bottom:8px;
+
+    color:#111827;
+
+}
+
+.topbar p{
+
+    font-size:16px;
+
+    color:#475569;
+
+    opacity:1;
+
+    font-weight:500;
+
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+
+    gap:22px;
+
+    margin:25px 0;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    box-shadow:var(--shadow);
+
+    transition:.25s;
+
+    border:1px solid #edf2f7;
+
+}
+
+.card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.card h2{
+
+    color:#475569;
+
+    font-size:15px;
+
+    margin-bottom:10px;
+
+}
+
+.numero{
+
+    font-size:40px;
+
+    font-weight:800;
+
+    color:var(--azul);
+
+}
+
+/* ===========================================================
+   TABELAS
+=========================================================== */
+
+.tabela{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    margin-top:25px;
+
+    box-shadow:var(--shadow);
+
+}
+
+.tabela h2{
+
+    font-size:24px;
+
+    margin-bottom:20px;
+
+    color:#111827;
+
+}
+
+.table-container{
+
+    width:100%;
+
+    overflow-x:auto;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+thead{
+
+    background:#1e293b;
+
+    color:white;
+
+}
+
+th{
+
+    padding:16px;
+
+    text-align:left;
+
+    font-size:15px;
+
+    font-weight:700;
+
+}
+
+td{
+
+    padding:16px;
+
+    border-bottom:1px solid #e5e7eb;
+
+    font-size:15px;
+
+    color:#374151;
+
+}
+
+tbody tr{
+
+    transition:.2s;
+
+}
+
+tbody tr:nth-child(even){
+
+    background:#f8fafc;
+
+}
+
+tbody tr:hover{
+
+    background:#eaf3ff;
+
+}
+
+/* ===========================================================
+   STATUS
+=========================================================== */
+
+.ativo{
+
+    color:#16a34a;
+
+    font-weight:700;
+
+}
+
+.manutencao{
+
+    color:#dc2626;
+
+    font-weight:700;
+
+}
+
+.pendente{
+
+    color:#f59e0b;
+
+    font-weight:700;
+
+}
+
+/* ===========================================================
+   FORMULÁRIOS
+=========================================================== */
+
+.form-cadastro{
+
+    background:white;
+
+    padding:35px;
+
+    border-radius:18px;
+
+    box-shadow:var(--shadow);
+
+    margin-bottom:30px;
+
+}
+
+.form-cadastro h2{
+
+    color:#111827;
+
+    margin-bottom:8px;
+
+    font-size:28px;
+
+}
+
+.form-cadastro p{
+
+    color:#475569;
+
+    font-size:15px;
+
+    margin-bottom:30px;
+
+    opacity:1;
+
+}
+
+.form-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:22px;
+
+}
+
+.form-group label{
+
+    margin-bottom:8px;
+
+    font-weight:700;
+
+    color:#334155;
+
+}
+
+.form-group input,
+
+.form-group select,
+
+.form-group textarea{
+
+    width:100%;
+
+    padding:15px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+    font-size:15px;
+
+    transition:.25s;
+
+}
+
+.form-group input:focus,
+
+.form-group select:focus,
+
+.form-group textarea:focus{
+
+    outline:none;
+
+    border-color:#2563eb;
+
+    background:white;
+
+    box-shadow:0 0 0 4px rgba(37,99,235,.15);
+
+}
+
+/* ===========================================================
+   BOTÕES
+=========================================================== */
+
+.btn-salvar{
+
+    width:100%;
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:18px;
+
+    margin-top:15px;
+
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    box-shadow:0 12px 25px rgba(22,163,74,.25);
+
+}
+
+.btn-salvar:hover{
+
+    transform:translateY(-3px);
+
+    background:linear-gradient(135deg,#15803d,#16a34a);
+
+    box-shadow:0 18px 30px rgba(22,163,74,.35);
+
+}
+
+.btn-tema{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    background:#2563eb;
+
+    color:white;
+
+    text-decoration:none;
+
+    padding:12px 20px;
+
+    border-radius:12px;
+
+    font-weight:700;
+
+    transition:.25s;
+
+}
+
+.btn-tema:hover{
+
+    background:#1d4ed8;
+
+    transform:translateY(-2px);
+
+}
+
+/* ===========================================================
+   ALERTAS
+=========================================================== */
+
+.alert{
+
+    padding:16px;
+
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+    font-weight:600;
+
+}
+
+.alert-success{
+
+    background:#dcfce7;
+
+    color:#166534;
+
+    border-left:5px solid #22c55e;
+
+}
+
+.alert-danger{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+    border-left:5px solid #ef4444;
+
+}
+
+.alert-warning{
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+    border-left:5px solid #f59e0b;
+
+}
+
+/* ===========================================================
+   TELA DE LOGIN
+=========================================================== */
+
+.login-page{
+
+    display:flex;
+
+    width:100%;
+
+    min-height:100vh;
+
+}
+
+.login-left{
+
+    width:45%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+
+}
+
+.login-right{
+
+    width:55%;
+
+    background:url("/static/new_logo_prefeitura.png") center center;
+
+    background-size:cover;
+
+    background-repeat:no-repeat;
+
+}
+
+.login-box{
+
+    width:420px;
+
+    padding:20px;
+
+}
+
+.login-box h1{
+
+    color:white;
+
+    font-size:42px;
+
+    margin-bottom:10px;
+
+    font-weight:800;
+
+}
+
+.subtitulo{
+
+    color:#cbd5e1;
+
+    margin-bottom:35px;
+
+    font-size:18px;
+
+}
+
+.login-box input{
+
+    width:100%;
+
+    margin-bottom:18px;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#334155;
+
+    color:white;
+
+    font-size:16px;
+
+}
+
+.login-box input::placeholder{
+
+    color:#cbd5e1;
+
+}
+
+.login-box button{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.login-box button:hover{
+
+    background:#1d4ed8;
+
+    transform:translateY(-2px);
+
+}
+
+/* ===========================================================
+   MODO ESCURO
+=========================================================== */
+
+body.dark-mode{
+
+    background:#0f172a;
+
+    color:#e2e8f0;
+
+}
+
+body.dark-mode .main{
+
+    background:#0f172a;
+
+}
+
+body.dark-mode .topbar{
+
+    background:#1e293b;
+
+}
+
+body.dark-mode .topbar h1,
+body.dark-mode .topbar h2{
+
+    color:white;
+
+}
+
+body.dark-mode .topbar p{
+
+    color:#e2e8f0;
+
+    opacity:1;
+
+}
+
+body.dark-mode .card{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .card h2{
+
+    color:#f1f5f9;
+
+}
+
+body.dark-mode .numero{
+
+    color:#38bdf8;
+
+}
+
+body.dark-mode .tabela{
+
+    background:#1e293b;
+
+}
+
+body.dark-mode .tabela h2{
+
+    color:white;
+
+}
+
+body.dark-mode table td{
+
+    color:#f1f5f9;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode tbody tr:nth-child(even){
+
+    background:#172033;
+
+}
+
+body.dark-mode tbody tr:hover{
+
+    background:#24344f;
+
+}
+
+body.dark-mode .form-cadastro{
+
+    background:#1e293b;
+
+}
+
+body.dark-mode .form-cadastro h2{
+
+    color:white;
+
+}
+
+body.dark-mode .form-cadastro p{
+
+    color:#e2e8f0;
+
+    opacity:1;
+
+}
+
+body.dark-mode .form-group label{
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea{
+
+    background:#0f172a;
+
+    color:white;
+
+    border:1px solid #334155;
+
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus,
+body.dark-mode .form-group textarea:focus{
+
+    background:#111827;
+
+}
+
+body.dark-mode .btn-tema{
+
+    background:white;
+
+    color:#0f172a;
+
+}
+
+body.dark-mode .btn-tema:hover{
+
+    background:#e2e8f0;
+
+}
+
+/* ============================
+   LINKS DOS CARDS
+============================ */
+
+.card{
+    text-decoration:none;
+    color:inherit;
+}
+
+.card h2{
+    color:#1e293b;
+}
+
+.card p{
+    margin-top:10px;
+    color:#64748b;
+    line-height:1.5;
+}
+
+.card small{
+    color:#64748b;
+}
+
+.card:hover{
+    text-decoration:none;
+}
+
+body.dark-mode .card h2{
+    color:#fff;
+}
+
+body.dark-mode .card p,
+body.dark-mode .card small{
+    color:#cbd5e1;
+}
+
+/* ============================
+   BOTÕES DA O.S.
+============================ */
+
+.btn-acao{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:7px 12px;
+    border-radius:6px;
+    color:white;
+    text-decoration:none;
+    font-size:12px;
+    font-weight:700;
+    margin:3px;
+    transition:.2s;
+}
+
+.btn-acao:hover{
+    transform:translateY(-2px);
+    opacity:.9;
+}
+.acoes-os{
+    text-align:center;
+    white-space:nowrap;
+}
+
+.acoes-os .btn-acao{
+    display:inline-flex;
+    margin:3px;
+}

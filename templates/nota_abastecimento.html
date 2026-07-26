@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cupom de Abastecimento #{{ "%04d"|format(item.id) }}</title>
+    <style>
+        /* Estilo simulando cupom de bobina térmica de 80mm */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 280px;
+            margin: 0;
+            padding: 10px;
+            color: #000;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+        .text-center { text-align: center; }
+        .linha-divisoria {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+        .titulo {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+        .valor-destaque {
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .campo {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .assinatura {
+            margin-top: 45px;
+            border-top: 1px solid #000;
+            text-align: center;
+            padding-top: 5px;
+            font-size: 10px;
+        }
+        .btn-print {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            width: 100%;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { width: 100%; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body onload="window.print();">
+
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir Cupom</button>
+    </div>
+
+    <div class="text-center">
+        <div class="titulo">PREFEITURA DE JUAZEIRO DO PIAUÍ</div>
+        <div style="font-size: 9px; letter-spacing: 0.5px;">SISTEMA INTEGRADO DE FROTAS</div>
+        <div style="font-size: 10px; font-weight: bold; margin-top: 4px;">POSTO CREDENCIADO</div>
+    </div>
+
+    <div class="linha-divisoria"></div>
+
+    <div class="text-center" style="font-weight: bold; font-size: 12px; margin-bottom: 6px;">
+        CUPOM DE ABASTECIMENTO<br>
+        Nº #{{ "%04d"|format(item.id) }}
+    </div>
+
+    <div class="campo">
+        <span>Data/Hora:</span>
+        <span>{{ item.data.strftime('%d/%m/%Y %H:%M') if item.data.strftime else item.data }}</span>
+    </div>
+    <div class="campo">
+        <span>Secretaria:</span>
+        <span style="font-weight: bold;">{{ item.secretaria.upper() if item.secretaria else '' }}</span>
+    </div>
+
+    <div class="linha-divisoria"></div>
+
+    <div class="campo">
+        <span>Veículo:</span>
+        <span style="font-weight: bold;">{{ item.veiculo }}</span>
+    </div>
+    {% if item.placa %}
+    <div class="campo">
+        <span>Placa:</span>
+        <span>{{ item.placa }}</span>
+    </div>
+    {% endif %}
+    <div class="campo">
+        <span>Km Atual:</span>
+        <span>{{ "{:,}".format(item.km_atual or 0).replace(',', '.') }} Km</span>
+    </div>
+    <div class="campo">
+        <span>Motorista:</span>
+        <span>{{ item.motorista }}</span>
+    </div>
+
+    <div class="linha-divisoria"></div>
+
+    <div class="campo">
+        <span>Combustível:</span>
+        <span style="font-weight: bold;">{{ item.combustivel }}</span>
+    </div>
+    <div class="campo">
+        <span>Litragem:</span>
+        <strong>{{ "%.2f"|format(item.litros or 0.0)|replace('.', ',') }} L</strong>
+    </div>
+    {% if item.preco_unitario %}
+    <div class="campo">
+        <span>Preço Litro:</span>
+        <span>R$ {{ "%.2f"|format(item.preco_unitario)|replace('.', ',') }}</span>
+    </div>
+    {% endif %}
+
+    <div class="linha-divisoria"></div>
+
+    <div class="campo valor-destaque">
+        <span>VALOR TOTAL:</span>
+        <span>{{ item.valor_total_formatado }}</span>
+    </div>
+
+    <div class="linha-divisoria"></div>
+
+    <div class="assinatura">
+        {{ item.motorista }}<br>
+        ASSINATURA DO MOTORISTA
+    </div>
+
+    <div style="text-align: center; font-size: 8px; margin-top: 25px; opacity: 0.7; text-transform: uppercase;">
+        Via do Posto / Auditoria Municipal
+    </div>
+
+</body>
+</html>

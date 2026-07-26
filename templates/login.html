@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Sistema de Frotas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <div class="login-left">
+        <div class="login-box">
+            <h1>Sistema de Frotas</h1>
+            <p class="subtitulo">Prefeitura de Juazeiro do Piauí</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="color: red; margin-bottom: 10px;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/login">
+                <input type="text" name="usuario" placeholder="Usuário" required>
+                <input type="password" name="senha" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+
+            <div style="margin-top: 25px; text-align: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px;">
+                <p style="margin-bottom: 10px; font-size: 13px; color: #666;">É um posto conveniado?</p>
+                <a href="{{ url_for('login_posto') }}" style="display: block; width: 100%; padding: 12px; background-color: #1e293b; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; box-sizing: border-box;">
+                    ⛽ Acessar Sistema do Posto
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-right"></div>
+
+</div>
+
+</body>
+</html>

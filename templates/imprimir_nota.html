@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nota de Abastecimento #{{ "%04d"|format(item.id) }}</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; padding: 20px; background-color: #fff; color: #000; font-size: 14px; }
+        .cupom { max-width: 320px; margin: 0 auto; border: 1px dashed #000; padding: 15px; }
+        .text-center { text-align: center; }
+        .linha { border-top: 1px dashed #000; margin: 10px 0; }
+        .item-info { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .btn-print { display: block; width: 100%; max-width: 320px; margin: 20px auto; padding: 12px; background: #10b981; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; font-family: sans-serif; }
+        @media print { .btn-print { display: none; } body { padding: 0; } .cupom { border: none; } }
+    </style>
+</head>
+<body>
+
+<a href="javascript:window.print()" class="btn-print">🖨️ Emitir / Imprimir Nota</a>
+<a href="/posto/abastecer" class="btn-print" style="background-color: #64748b;">⬅️ Voltar ao Painel</a>
+
+<div class="cupom">
+    <h3 class="text-center" style="margin: 0; font-size: 16px;">PREFEITURA DE JUAZEIRO DO PIAUÍ</h3>
+    <p class="text-center" style="font-size: 11px; margin: 5px 0;">CONTROLE INTERNO DE FROTAS</p>
+    <div class="linha"></div>
+    <p class="text-center" style="font-weight: bold; margin: 5px 0;">NOTA DE ABASTECIMENTO<br>Nº {{ "%04d"|format(item.id) }}</p>
+    <div class="linha"></div>
+
+    <div class="item-info"><span>Data Lançamento:</span> <span>{{ item.data }}</span></div>
+    <div class="item-info"><span>Status da Nota:</span> <span style="text-transform: uppercase; font-weight: bold;">{{ item.status }}</span></div>
+    <div class="linha"></div>
+
+    <div style="margin-bottom: 8px;"><strong>Veículo credenciado:</strong><br>{{ item.veiculo }}</div>
+    <div style="margin-bottom: 8px;"><strong>Condutor / Motorista:</strong><br>{{ item.motorista }}</div>
+    <div class="linha"></div>
+
+    <div class="item-info"><span>Combustível:</span> <span>{{ item.combustivel }}</span></div>
+    <div class="item-info"><span>Volume Total:</span> <span>{{ item.litros }} L</span></div>
+    <div class="item-info"><span>Odômetro (KM):</span> <span>{{ item.km_atual }} KM</span></div>
+    <div class="linha"></div>
+
+    <div class="item-info" style="font-size: 16px; font-weight: bold;"><span>VALOR TOTAL:</span> <span>R$ {{ item.valor_total }}</span></div>
+    <div class="linha"></div>
+
+    {% if item.status == 'Estornado' %}
+    <h4 class="text-center" style="color: red; margin: 15px 0;">ESTA NOTA FOI INVALIDADA / ESTORNADA</h4>
+    {% else %}
+    <p class="text-center" style="font-size: 11px; margin-top: 35px;">Assinatura do Motorista:<br><br>_________________________________</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="topbar">
+    <div>
+        <h1>🚘 Frota Municipal Consolidada</h1>
+        <p>Inventário completo e auditado de veículos, maquinários e autocarros de Juazeiro do Piauí.</p>
+    </div>
+</div>
+
+<div class="tabela">
+    <h2>📋 Lista de Veículos Oficiais</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Veículo / Equipamento</th>
+                    <th>Placa de Identificação</th>
+                    <th>Secretaria Vinculada</th>
+                    <th style="text-align: center;">Último KM</th> <!-- NOVA COLUNA -->
+                    <th style="text-align: center;">Status Operacional</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in veiculos %}
+                <tr>
+                    <td><strong>{{ v.modelo }}</strong></td>
+                    <td><span class="badge bg-secondary" style="font-family: monospace; font-size: 1.1em; padding: 4px 8px; background: #e2e8f0; color: #1e293b; border-radius: 4px; border: 1px solid #cbd5e1;">{{ v.placa }}</span></td>
+                    <td>{{ v.secretaria }}</td>
+
+                    <!-- EXIBIÇÃO DA QUILOMETRAGEM -->
+                    <td style="text-align: center; font-weight: bold; color: #0f172a;">
+                        {% if v.quilometragem and v.quilometragem > 0 %}
+                            {{ "{:,}".format(v.quilometragem).replace(',', '.') }} KM
+                        {% else %}
+                            <span style="color: #94a3b8; font-weight: normal; font-size: 0.9em;">Não informado</span>
+                        {% endif %}
+                    </td>
+
+                    <td style="text-align: center;">
+                        <span class="{% if v.status == 'Ativo' %}ativo{% else %}manutencao{% endif %}">
+                            {{ v.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        Nenhum veículo cadastrado no sistema.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

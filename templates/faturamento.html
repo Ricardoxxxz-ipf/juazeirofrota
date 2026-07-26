@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="painel-index">
+
+    {% if not secretaria %}
+    <div style="margin-bottom: 30px;">
+        <h1 style="margin: 0; font-size: 26px;">🧾 Painel de Faturamento de Combustível</h1>
+        <p style="margin: 5px 0 0 0; opacity: 0.7;">Selecione uma das secretarias abaixo para gerar e liquidar os demonstrativos de abastecimento.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+
+        <a href="/faturamento/Prefeitura" style="text-decoration: none; color: inherit;">
+            <div class="card card-selecao" style="border-left: 5px solid #3b82f6; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🏛️</div>
+                <h3 style="margin: 0 0 10px 0; font-size: 18px;">Prefeitura</h3>
+                <span style="background: #eff6ff; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">Gerar Faturamento</span>
+            </div>
+        </a>
+
+        <a href="/faturamento/Saúde" style="text-decoration: none; color: inherit;">
+            <div class="card card-selecao" style="border-left: 5px solid #10b981; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🏥</div>
+                <h3 style="margin: 0 0 10px 0; font-size: 18px;">Secretaria de Saúde</h3>
+                <span style="background: #ecfdf5; color: #065f46; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">Gerar Faturamento</span>
+            </div>
+        </a>
+
+        <a href="/faturamento/Educação" style="text-decoration: none; color: inherit;">
+            <div class="card card-selecao" style="border-left: 5px solid #f59e0b; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🎒</div>
+                <h3 style="margin: 0 0 10px 0; font-size: 18px;">Secretaria de Educação</h3>
+                <span style="background: #fffbeb; color: #92400e; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">Gerar Faturamento</span>
+            </div>
+        </a>
+
+        <a href="/faturamento/Assistência Social" style="text-decoration: none; color: inherit;">
+            <div class="card card-selecao" style="border-left: 5px solid #ec4899; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🛡️</div>
+                <h3 style="margin: 0 0 10px 0; font-size: 18px;">Assistência Social</h3>
+                <span style="background: #fdf2f8; color: #9d174d; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">Gerar Faturamento</span>
+            </div>
+        </a>
+
+    </div>
+
+    {% else %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap;">
+        <div>
+            <a href="/faturamento" style="text-decoration: none; color: #3b82f6; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                ⬅️ Voltar para Seleção de Secretarias
+            </a>
+            <h1 style="margin: 10px 0 0 0; font-size: 24px;">Demonstrativo de Faturamento de Combustível</h1>
+        </div>
+        <a href="{{ url_for('imprimir_faturamento', secretaria=secretaria, data_inicio=data_inicio, data_fim=data_fim) }}" target="_blank" style="text-decoration: none; background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px;">
+            🖨️ Visualizar para Impressão
+        </a>
+    </div>
+
+    <!-- Formulário do Filtro de Período -->
+    <div class="filtro-container" style="background: var(--bg-card, #ffffff); padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; border: 1px solid #e2e8f0;">
+        <form method="GET" action="{{ url_for('faturamento', secretaria=secretaria) }}" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-weight: bold; font-size: 0.9rem; color: #475569;">Faturar de:</label>
+                <input type="date" name="data_inicio" value="{{ data_inicio or '' }}" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem;" required>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-weight: bold; font-size: 0.9rem; color: #475569;">até:</label>
+                <input type="date" name="data_fim" value="{{ data_fim or '' }}" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem;" required>
+            </div>
+            <button type="submit" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem;">
+                Gerar Fechamento
+            </button>
+            {% if data_inicio or data_fim %}
+                <a href="{{ url_for('faturamento', secretaria=secretaria) }}" style="color: #64748b; font-size: 0.9rem; text-decoration: none; font-weight: 500; margin-left: 5px; border-bottom: 1px dashed #64748b;">Limpar Filtro</a>
+            {% endif %}
+        </form>
+        <div>
+            {% if data_inicio and data_fim %}
+                <span class="badge" style="background-color: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem;">Período Restrito</span>
+            {% else %}
+                <span style="font-size: 0.85rem; color: #64748b; font-weight: bold; text-transform: uppercase;">Acumulado Geral Aberto</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="tabela bloco-nota" style="background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 25px;" class="cabecalho-nota">
+            <div>
+                <h2 style="margin: 0; font-size: 22px; color: #1e293b;">🏛️ PREFEITURA MUNICIPAL DE JUAZEIRO DO PIAUÍ</h2>
+                <p style="margin: 5px 0 0 0; opacity: 0.7; font-size: 14px;">Auditoria de Abastecimentos e Consumo de Combustível da Frota</p>
+                <small style="display: block; margin-top: 5px; opacity: 0.6;">
+                    {% if data_inicio and data_fim %}
+                        Fechamento: <strong>{{ data_inicio }}</strong> até <strong>{{ data_fim }}</strong>
+                    {% else %}
+                        Emitido em: {{ data_emissao }}
+                    {% endif %}
+                </small>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 12px; text-transform: uppercase; font-weight: bold; opacity: 0.6; display: block;">Secretaria Analisada:</span>
+                <strong style="font-size: 18px; color: #3b82f6; display: block; margin-top: 2px;">{{ secretaria.upper() }}</strong>
+            </div>
+        </div>
+
+        <!-- Card Resumo de Combustível -->
+        <div style="background: #2563eb; border: 1px solid #2563eb; padding: 20px; border-radius: 8px; color: white; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 13px; opacity: 0.9; display: block; font-weight:bold; text-transform: uppercase;">⛽ Total Geral Líquido</span>
+                <small style="opacity:0.8;">Apenas cupons ativos e concluídos no período</small>
+            </div>
+            <strong style="font-size: 26px; color: #ffffff;">{{ total_combustivel }}</strong>
+        </div>
+
+        <!-- TABELA: ABASTECIMENTOS -->
+        <h3 style="margin: 15px 0; font-size: 16px; display:flex; align-items:center; gap:8px;">📋 Demonstrativo de Abastecimentos Vinculados</h3>
+        <div class="table-container">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 12px;">Nº Cupom</th>
+                        <th style="text-align: left; padding: 12px;">Data</th>
+                        <th style="text-align: left; padding: 12px;">Veículo / Equipamento</th>
+                        <th style="text-align: left; padding: 12px;">Motorista</th>
+                        <th style="text-align: left; padding: 12px;">Combustível</th>
+                        <th style="text-align: right; padding: 12px;">Valor Cupom</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in abastecimentos %}
+                    <tr>
+                        <td style="padding: 12px;">#{{ "%04d"|format(item.id) }}</td>
+                        <td style="padding: 12px; font-size: 13px;">{{ item.data.strftime('%d/%m/%Y') }}</td>
+                        <td style="padding: 12px;"><strong>{{ item.veiculo }}</strong></td>
+                        <td style="padding: 12px;">{{ item.motorista }}</td>
+                        <td style="padding: 12px;">{{ item.combustivel }}</td>
+                        <td style="padding: 12px; text-align: right;"><strong>{{ item.valor_total_formatado }}</strong></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px; font-style: italic; background: transparent;">
+                            Nenhum abastecimento registrado para esta secretaria no período selecionado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .card-selecao:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+    body.dark .card-selecao { background-color: #111827 !important; border-color: #1f2937 !important; }
+    body.dark .card-selecao span { background-color: #1f2937 !important; color: #f3f4f6 !important; }
+    body.dark .filtro-container { background-color: #111827 !important; border-color: #1f2937 !important; }
+    body.dark .bloco-nota { background-color: #111827 !important; border-color: #1f2937 !important; }
+    body.dark .cabecalho-nota h2 { color: #ffffff !important; }
+</style>
+{% endblock %}

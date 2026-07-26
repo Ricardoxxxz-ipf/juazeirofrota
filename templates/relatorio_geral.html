@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ titulo_pagina }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.4; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
+        .header h2 { margin: 0; font-size: 22px; text-transform: uppercase; }
+        .header h3 { margin: 5px 0; font-size: 16px; color: #555; }
+
+        /* Estilo do Formulário de Filtro por Data */
+        .filtro-balancete {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .filtro-form {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .filtro-form label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #475569;
+        }
+        .filtro-form input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+        .btn-filtrar {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .btn-filtrar:hover {
+            background: #0f172a;
+        }
+        .link-limpar {
+            color: #64748b;
+            font-size: 13px;
+            text-decoration: none;
+            border-bottom: 1px dashed #64748b;
+        }
+
+        .secao-titulo { background: #1e293b; color: white; padding: 8px 15px; margin-top: 30px; border-radius: 4px; font-size: 16px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-size: 13px; }
+        th { background-color: #f1f5f9; font-weight: bold; }
+
+        .nota-repasse { margin-top: 50px; border: 2px dashed #0f172a; padding: 25px; border-radius: 8px; background: #fafafa; page-break-inside: avoid; }
+        .nota-repasse h4 { margin: 0 0 15px 0; text-align: center; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; color: #1e3a8a; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .grid-banco { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .info-grupo { font-size: 14px; }
+        .info-grupo strong { color: #0f172a; }
+
+        /* Estilo para destacar o valor total do repasse */
+        .total-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .total-titulo { font-size: 14px; font-weight: bold; color: #334155; text-transform: uppercase; }
+        .total-valor { font-size: 20px; font-weight: bold; color: #166534; }
+
+        .codigo-barras-container { text-align: center; margin-top: 25px; border-top: 1px dashed #999; padding-top: 15px; }
+        .linha-digitavel { font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: bold; letter-spacing: 1px; background: #e2e8f0; padding: 8px; display: inline-block; border-radius: 4px; margin-bottom: 10px; }
+        .barras { display: flex; justify-content: center; align-items: flex-end; height: 50px; margin: 0 auto; width: 350px; background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px); border-left: 4px solid #000; border-right: 4px solid #000; }
+
+        .btn-print { background: #166534; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 20px; font-size: 15px; }
+        .btn-print:hover { background: #15803d; }
+
+        @media print {
+            .btn-print, .filtro-balancete { display: none !important; }
+            body { padding: 0; }
+            .nota-repasse { background: white; }
+        }
+    </style>
+</head>
+<body>
+
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="btn-print" onclick="window.print()">🖨️ Emitir Documento</button>
+    </div>
+
+    <!-- Barra de Filtros por Período (Ocultada na Impressão) -->
+    <div class="filtro-balancete">
+        <form method="GET" action="{{ url_for('relatorio_geral') }}" class="filtro-form">
+            <input type="hidden" name="tipo" value="{{ tipo }}">
+            <label>Período do Balancete:</label>
+            <input type="date" name="data_inicio" value="{{ data_inicio or '' }}" required>
+            <span>até</span>
+            <input type="date" name="data_fim" value="{{ data_fim or '' }}" required>
+            <button type="submit" class="btn-filtrar">Filtrar Período</button>
+            {% if data_inicio or data_fim %}
+                <a href="{{ url_for('relatorio_geral', tipo=tipo) }}" class="link-limpar">Limpar</a>
+            {% endif %}
+        </form>
+        <div>
+            {% if data_inicio and data_fim %}
+                <span style="font-size: 12px; font-weight: bold; color: #1e3a8a; background: #dbeafe; padding: 5px 10px; border-radius: 4px;">Período Ativo</span>
+            {% else %}
+                <span style="font-size: 12px; font-weight: bold; color: #475569;">Exibindo Tudo (Sem Filtro)</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="header">
+        <h2>Prefeitura Municipal de Juazeiro do Piauí</h2>
+        <h3>{{ titulo_pagina }}</h3>
+        <p>
+            {% if data_inicio and data_fim %}
+                Período Selecionado: <strong>{{ data_inicio.split('-')[2] }}/{{ data_inicio.split('-')[1] }}/{{ data_inicio.split('-')[0] }}</strong> até <strong>{{ data_fim.split('-')[2] }}/{{ data_fim.split('-')[1] }}/{{ data_fim.split('-')[0] }}</strong>
+            {% else %}
+                Emitido em: {{ data_emissao.strftime('%d/%m/%Y %H:%M') if data_emissao.strftime else data_emissao }}
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Inicializa a soma dos valores exibidos no balancete -->
+    {% set total_geral_os = namespace(valor=0.0) %}
+
+    {% if tipo == 'manutencao' or tipo == 'geral' %}
+    <div class="secao-titulo">📊 BALANCETE: DESPESAS COM MANUTENÇÃO (Mecânica / Peças)</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nº O.S.</th>
+                <th>Data</th>
+                <th>Veículo</th>
+                <th>Oficina Credenciada</th>
+                <th>Responsável</th>
+                <th>Valor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in manutencoes %}
+                {% if item.status != 'Cancelado' %}
+                    {% set total_geral_os.valor = total_geral_os.valor + (item.valor or 0.0) %}
+                {% endif %}
+            <tr>
+                <td>#{{ "%04d" | format(item.id) }}</td>
+                <td>{{ item.data.strftime('%d/%m/%Y') }}</td>
+                <td>{{ item.veiculo }}</td>
+                <td>{{ item.oficina }}</td>
+                <td>{{ item.responsavel }}</td>
+                <td><strong>{{ item.valor_formatado }}</strong></td>
+                <td><strong>{{ item.status }}</strong></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #666; padding: 15px;">Nenhum registro de manutenção encontrado no período selecionado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if tipo == 'servico' or tipo == 'geral' %}
+    <div class="secao-titulo">📊 BALANCETE: DESPESAS COM SERVIÇOS (Lava-Jato / Borracharia / Outros)</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nº O.S.</th>
+                <th>Data</th>
+                <th>Veículo</th>
+                <th>Estabelecimento Credenciado</th>
+                <th>Responsável</th>
+                <th>Valor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in servicos %}
+                {% if item.status != 'Cancelado' %}
+                    {% set total_geral_os.valor = total_geral_os.valor + (item.valor or 0.0) %}
+                {% endif %}
+            <tr>
+                <td>#{{ "%04d" | format(item.id) }}</td>
+                <td>{{ item.data.strftime('%d/%m/%Y') }}</td>
+                <td>{{ item.veiculo }}</td>
+                <td>{{ item.oficina }}</td>
+                <td>{{ item.responsavel }}</td>
+                <td><strong>{{ item.valor_formatado }}</strong></td>
+                <td><strong>{{ item.status }}</strong></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #666; padding: 15px;">Nenhum registro de serviço encontrado no período selecionado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="nota-repasse">
+        <h4>DOCUMENTO DE REPASSE FINANCEIRO (BALANCETE INTEGRADO)</h4>
+
+        <div class="grid-banco">
+            <div class="info-grupo">
+                <p><strong>Beneficiário (Nossos Dados):</strong></p>
+                <p>{{ banco.empresa }}</p>
+                <p><strong>CNPJ:</strong> {{ banco.cnpj }}</p>
+            </div>
+            <div class="info-grupo">
+                <p><strong>Pagador:</strong></p>
+                <p>Prefeitura Municipal de Juazeiro do Piauí</p>
+                <p><strong>Setor:</strong> Departamento de Finanças / Contabilidade</p>
+            </div>
+        </div>
+
+        <div class="grid-banco" style="border-top: 1px solid #eee; padding-top: 15px;">
+            <div class="info-grupo">
+                <p><strong>Dados Bancários para Depósito:</strong></p>
+                <p><strong>Banco:</strong> {{ banco.banco }}</p>
+                <p><strong>Agência:</strong> {{ banco.agencia }} | <strong>Conta Corrente:</strong> {{ banco.conta }}</p>
+            </div>
+            <div class="info-grupo">
+                <p><strong>Chave PIX Opcional:</strong></p>
+                <p style="font-size: 16px; font-weight: bold; color: #166534;">{{ banco.pix }}</p>
+            </div>
+        </div>
+
+        <!-- BLOCO DE DESTAQUE: VALOR DO REPASSE DA PREFEITURA -->
+        <div class="total-container">
+            <span class="total-titulo">VALOR TOTAL ACUMULADO NO PERÍODO:</span>
+            <span class="total-valor">R$ {{ "%.2f"|format(total_geral_os.valor)|replace('.', ',') }}</span>
+        </div>
+
+        <div class="codigo-barras-container">
+            <div class="linha-digitavel">{{ banco.codigo_barras }}</div>
+            <div class="barras"></div>
+            <p style="font-size: 10px; color: #555; margin-top: 5px; text-transform: uppercase;">Uso exclusivo para processamento de balancetes pela tesouraria</p>
+        </div>
+    </div>
+
+</body>
+</html>

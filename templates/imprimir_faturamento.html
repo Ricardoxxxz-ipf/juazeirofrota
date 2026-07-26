@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Faturamento Combustível - {{ secretaria }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #333; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background-color: #f8fafc; border: 1px solid #ccc; padding: 10px; text-align: left; font-size: 13px; }
+        td { border: 1px solid #ccc; padding: 10px; text-align: left; font-size: 13px; }
+        .footer { margin-top: 40px; border-top: 2px solid #000; padding-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .dev-info { font-size: 11px; color: #64748b; margin-top: 20px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+        .btn-imprimir { background: #2563eb; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        @media print { .btn-imprimir { display: none; } }
+    </style>
+</head>
+<body>
+
+<button class="btn-imprimir" onclick="window.print()">🖨️ Confirmar Impressão / Salvar PDF</button>
+
+<div class="header">
+    <div>
+        <h3>EMISSOR:</h3>
+        <p><strong>ODRAX TECH</strong></p>
+        <p>Gestão de Frota e Combustíveis</p>
+    </div>
+    <div style="text-align: right;">
+        <h3>DESTINATÁRIO:</h3>
+        <p><strong>Prefeitura Municipal de Juazeiro do Piauí</strong></p>
+        <p>Faturamento: <strong>{{ secretaria }}</strong></p>
+        <p>Emissão: {{ data_emissao }}</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nº Cupom</th>
+            <th>Data</th>
+            <th>Veículo</th>
+            <th>Motorista</th>
+            <th>Combustível</th>
+            <th>Valor</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in abastecimentos %}
+        <tr>
+            <td>#{{ "%04d"|format(item.id) }}</td>
+            <td>{{ item.data.strftime('%d/%m/%Y') }}</td>
+            <td>{{ item.veiculo }}</td>
+            <td>{{ item.motorista }}</td>
+            <td>{{ item.combustivel }}</td>
+            <td>{{ item.valor_total_formatado }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="text-align: right; font-size: 22px; font-weight: bold; margin-bottom: 20px;">
+    TOTAL DE COMBUSTÍVEL: {{ total_faturado }}
+</div>
+
+<div class="footer">
+    <div>
+        <p><strong>CHAVE PIX (CNPJ ODRAX):</strong> [INSIRA SEU CNPJ AQUI]</p>
+        <canvas id="barcode"></canvas>
+    </div>
+    <div>
+        <canvas id="qrcode"></canvas>
+    </div>
+</div>
+
+<div class="dev-info">
+    <p>Documento oficial emitido sob responsabilidade de ODRAX TECH</p>
+    <p><strong>Sistema de Gestão de Frotas • Prefeitura Municipal de Juazeiro do Piauí</strong></p>
+</div>
+
+<script>
+    JsBarcode("#barcode", "98765432109876543210", { format: "CODE128", width: 2, height: 50 });
+    QRCode.toCanvas(document.getElementById('qrcode'), 'PIX: [SEU_PIX_AQUI] | Combustível: {{ total_faturado }}', { width: 120 });
+</script>
+
+</body>
+</html>

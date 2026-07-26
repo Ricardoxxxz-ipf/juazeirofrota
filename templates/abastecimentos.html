@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="topbar">
+    <h1>⛽ Histórico de Abastecimentos</h1>
+    <p>Consolidado de auditoria e consumo de combustível da frota de Juazeiro do Piauí.</p>
+</div>
+
+<div class="cards">
+    <div class="card">
+        <h2>Total Consumido (Geral)</h2>
+        <div class="numero" style="color: #b91c1c;">{{ total_gasto }}</div>
+    </div>
+
+    <div class="card">
+        <h2>Saldo Orçamentário Disponível</h2>
+        <div class="numero" style="color: #166534;">{{ total_disponivel }}</div>
+    </div>
+</div>
+
+<div class="tabela" style="margin-top: 30px;">
+
+    <div class="table-container">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nº CUPOM</th>
+                    <th>DATA/HORA</th>
+                    <th>VEÍCULO / EQUIPAMENTO</th>
+                    <th>SECRETARIA VINCULADA</th>
+                    <th>MOTORISTA</th>
+                    <th>COMBUSTÍVEL</th>
+                    <th>LITRAGEM</th>
+                    <th>ODÔMETRO</th>
+                    <th>VALOR TOTAL</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in historico %}
+
+                <tr> style="{% if item.status == 'Estornado' %}color: #94a3b8; background-color: #f8fafc; font-style: italic;{% endif %}">
+                    <td><strong>#{{ "%04d" | format(item.id) }}</strong></td>
+
+                    <td>
+                        {% if item.data %}
+                            {{ item.data.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                            <span style="color: #94a3b8;">--/--/---- --:--</span>
+                        {% endif %}
+                    </td>
+
+                    <td><strong>{{ item.veiculo }}</strong></td>
+                    <td><span style="font-size: 12px; font-weight: 600; color: #475569;">{{ item.secretaria }}</span></td>
+                    <td>{{ item.motorista }}</td>
+                    <td>{{ item.combustivel }}</td>
+                    <td>{{ item.litros }} L</td>
+                    <td>{{ "{:,}".format(item.km_atual).replace(',', '.') }} KM</td>
+                    <td><strong>{{ item.valor_total_formatado }}</strong></td>
+                    <td>
+                        <span class="badge {% if item.status == 'Estornado' %}manutencao{% else %}ativo{% endif %}" style="font-size: 11px;">
+                            {{ item.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" style="text-align: center; color: #94a3b8; padding: 40px; font-style: italic;">
+                        Nenhum registro de abastecimento localizado no banco de dados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

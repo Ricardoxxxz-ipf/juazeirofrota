@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Posto Conveniado - Lançar Abastecimento</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .container-posto {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 1000px;
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+        .header-posto {
+            text-align: center;
+            margin-bottom: 35px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+        }
+        .header-posto h1 {
+            margin: 0 0 5px 0;
+            color: #1e293b;
+            font-size: 32px;
+        }
+        .header-posto .subtitulo {
+            color: #64748b;
+            margin: 0;
+            font-size: 16px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        .form-group-posto {
+            text-align: left;
+        }
+        .form-group-posto label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #334155;
+        }
+        .form-group-posto select,
+        .container-posto input[type="text"],
+        .container-posto input[type="number"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #f8fafc;
+            box-sizing: border-box;
+            color: #334155;
+            margin: 0;
+        }
+        .form-group-posto select:focus,
+        .container-posto input:focus {
+            border-color: #10b981;
+            background-color: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        /* CUSTOMIZAÇÃO DAS CAIXAS DE BUSCA DA LUPA */
+        .ts-wrapper .ts-control {
+            padding: 12px 14px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            background-color: #f8fafc !important;
+            font-size: 16px !important;
+            color: #334155 !important;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+        }
+
+        .campo-destaque {
+            background-color: #f0fdf4 !important;
+            border-color: #86efac !important;
+            font-weight: bold;
+            color: #166534 !important;
+        }
+        .btn-gravar {
+            grid-column: span 2;
+            width: 100%;
+            padding: 16px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 15px;
+        }
+        .btn-gravar:hover { background-color: #059669; }
+        .link-voltar { display: block; text-align: center; margin-top: 25px; color: #64748b; text-decoration: none; font-size: 15px; }
+        .link-voltar:hover { color: #334155; text-decoration: underline; }
+
+        /* SEÇÃO DO HISTÓRICO DE LANÇAMENTOS */
+        .historico-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 1000px;
+            box-sizing: border-box;
+        }
+        .historico-section h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .badge-concluido { background-color: #dcfce7; color: #15803d; }
+        .badge-estornado { background-color: #fee2e2; color: #b91c1c; }
+
+        .btn-acao { padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 12px; margin-right: 5px; display: inline-block; }
+        .btn-imprimir { background-color: #3b82f6; color: white; }
+        .btn-imprimir:hover { background-color: #2563eb; }
+        .btn-estornar { background-color: #ef4444; color: white; }
+        .btn-estornar:hover { background-color: #dc2626; }
+
+        .linha-estornada { color: #94a3b8; background-color: #f8fafc; }
+        .linha-estornada strong { color: #94a3b8; }
+    </style>
+</head>
+
+<body>
+
+<div class="container-posto">
+    <div class="header-posto">
+        <h1>⛽ Lançar Abastecimento</h1>
+        <p class="subtitulo">Prefeitura de Juazeiro do Piauí - Painel do Posto</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" style="margin-bottom: 25px; text-align: center; width: 100%; box-sizing: border-box; padding: 10px; border-radius: 5px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/posto/abastecer">
+        <div class="form-grid">
+
+            <div class="form-group-posto">
+                <label>Veículo:</label>
+                <select id="busca-veiculo" name="veiculo" placeholder="🔍 Digite o modelo ou a placa..." required>
+                    <option value=""></option>
+                    {% for v in veiculos %}
+                        <option value="{{ v }}">{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group-posto">
+                <label>Motorista:</label>
+                <select id="busca-motorista" name="motorista" placeholder="🔍 Digite o nome do motorista..." required>
+                    <option value=""></option>
+                    {% for m in motoristas %}
+                        <option value="{{ m }}">{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group-posto">
+                <label>Combustível:</label>
+                <select name="combustivel" id="combustivel" required>
+                    <option value="Diesel S10">Diesel S10</option>
+                    <option value="Diesel Comum">Diesel Comum</option>
+                    <option value="Gasolina Comum">Gasolina Comum</option>
+                </select>
+            </div>
+
+            <div class="form-group-posto">
+                <label>Quilometragem Atual:</label>
+                <input type="number" name="km_atual" placeholder="Ex: 85200" required autocomplete="off">
+            </div>
+
+            <div class="form-group-posto">
+                <label>Quantidade de Litros:</label>
+                <input type="text" name="litros" id="litros" placeholder="Ex: 45.50" required autocomplete="off">
+            </div>
+
+            <div class="form-group-posto">
+                <label>Valor Total R$:</label>
+                <input type="text" name="valor_total" id="valor_total" placeholder="Calculado automaticamente" class="campo-destaque" required autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-gravar">Gravar Abastecimento</button>
+        </div>
+    </form>
+    <a href="/login" class="link-voltar">Voltar para o Login Geral</a>
+</div>
+
+<div class="historico-section">
+    <h2>📄 Notas de Abastecimento Lançadas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>CUPOM</th>
+                <th>DATA</th>
+                <th>VEÍCULO</th>
+                <th>MOTORISTA</th>
+                <th>TOTAL</th>
+                <th>STATUS</th>
+                <th style="text-align: center;">AÇÕES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in historico %}
+            <tr class="{% if item.status == 'Estornado' %}linha-estornada{% endif %}">
+                <td><strong>#{{ "%04d"|format(item.id) }}</strong></td>
+
+                <td>{{ item.data.strftime('%d/%m/%Y %H:%M') }}</td>
+
+                <td>{{ item.veiculo }}</td>
+                <td>{{ item.motorista }}</td>
+                <!-- Utilizando a propriedade formatada do Python -->
+                <td><strong>{{ item.valor_total_formatado }}</strong> ({{ item.litros }}L)</td>
+                <td>
+                    {% if item.status == 'Estornado' %}
+                        <span class="badge badge-estornado">Estornado</span>
+                    {% else %}
+                        <span class="badge badge-concluido">Concluído</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <a href="/posto/nota/{{ item.id }}" target="_blank" class="btn-acao btn-imprimir">🖨️ Imprimir Nota</a>
+                    {% if item.status != 'Estornado' %}
+                        <a href="/posto/estornar/{{ item.id }}" class="btn-acao btn-estornar" onclick="return confirm('Tem certeza que deseja estornar esta nota?')">❌ Estornar</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">Nenhum abastecimento lançado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Inicialização da biblioteca de lupas
+    new TomSelect("#busca-veiculo",{ create: false, sortField: { field: "text", direction: "asc" } });
+    new TomSelect("#busca-motorista",{ create: false, sortField: { field: "text", direction: "asc" } });
+
+    const campoLitros = document.getElementById('litros');
+    const campoCombustivel = document.getElementById('combustivel');
+    const campoValorTotal = document.getElementById('valor_total');
+
+    // Tabela de Preços do Posto
+    const tabelaPrecos = {
+        'Diesel S10': 7.80,
+        'Diesel Comum': 7.80,
+        'Gasolina Comum': 7.50,
+    };
+
+    function calcularTotal() {
+        let litros = parseFloat(campoLitros.value.replace(',', '.'));
+        let combustivel = campoCombustivel.value;
+
+        if (!isNaN(litros) && litros > 0 && tabelaPrecos[combustivel]) {
+            let precoLitro = tabelaPrecos[combustivel];
+            let total = litros * precoLitro;
+            campoValorTotal.value = total.toFixed(2);
+        } else {
+            campoValorTotal.value = '';
+        }
+    }
+
+    campoLitros.addEventListener('input', calcularTotal);
+    campoCombustivel.addEventListener('change', calcularTotal);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="topbar">
+    <div>
+        <h1>👨‍🔧 Ordens de Serviço</h1>
+        <p>Gerenciamento de manutenções e reparos da frota municipal.</p>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="form-cadastro">
+
+    <h2>🛠️ Abrir Nova Ordem de Serviço</h2>
+    <p>Preencha as informações para registrar uma nova manutenção.</p>
+
+    <form method="POST" action="{{ url_for('os_rota') }}" enctype="multipart/form-data">
+
+        <!-- Grid de 3 colunas para os campos principais -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:20px;">
+
+            <!-- CAMPO DO VEÍCULO COM LUPA E SECRETARIA -->
+            <div class="form-group" style="position: relative;">
+                <label>🔍 Buscar Veículo Beneficiário</label>
+                <input type="text"
+                       id="busca-veiculo"
+                       placeholder="Digite o modelo, placa ou secretaria..."
+                       autocomplete="off"
+                       style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-color); box-sizing: border-box;"
+                       onfocus="mostrarOpcoes()"
+                       oninput="filtrarVeiculos()">
+
+                <!-- Campo oculto que envia os dados originais esperados pelo Flask backend -->
+                <input type="hidden" name="veiculo" id="veiculo-selecionado-real" required>
+
+                <!-- Menu suspenso customizado para os veículos -->
+                <div id="lista-veiculos-dropdown" style="display: none; position: absolute; left: 0; right: 0; max-height: 220px; overflow-y: auto; background: var(--bg-card, #ffffff); border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 999; margin-top: 5px; box-sizing: border-box;">
+                    {% for v in veiculos %}
+                        {% set partes = v.split(' - ') %}
+                        {% set carro_placa = partes[0] %}
+                        {% set secretaria_tag = partes[1] if partes|length > 1 else '' %}
+
+                        <div class="opcao-veiculo"
+                             data-valor-original="{{ v }}"
+                             data-valor-curto="{{ carro_placa }}"
+                             style="padding: 10px 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: var(--text-color, #1e293b);"
+                             onclick="selecionarVeiculo('{{ v }}', '{{ carro_placa }}')">
+
+                            <span>🚗 <strong>{{ carro_placa }}</strong></span>
+                            {% if secretaria_tag %}
+                                <span style="font-size: 11px; background: #eff6ff; color: #1e40af; padding: 3px 8px; border-radius: 12px; font-weight: bold; text-transform: uppercase;">
+                                    {{ secretaria_tag }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Oficina / Estabelecimento</label>
+                <select name="oficina" required>
+                    {% for o in oficinas %}
+                    <option value="{{ o }}">{{ o }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Natureza do Serviço</label>
+                <select name="tipo_servico" required>
+                    <option value="Manutenção">Manutenção (Mecânica / Peças)</option>
+                    <option value="Serviço">Serviço (Lava-Jato / Borracharia)</option>
+                </select>
+            </div>
+
+            <!-- VALOR DO SERVIÇO -->
+            <div class="form-group">
+                <label>Valor do Serviço (R$)</label>
+                <input type="number" step="0.01" min="0" name="valor" placeholder="0.00" required
+                       style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-color);">
+            </div>
+
+            <!-- ANEXAR ARQUIVOS DA NOTA FISCAL -->
+            <div class="form-group">
+                <label>Anexar Nota Fiscal (PDF, Imagem)</label>
+                <input type="file" name="nota_fiscal" accept=".pdf,.png,.jpg,.jpeg,.gif"
+                       style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: var(--bg-card); color: var(--text-color);">
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn-salvar">
+            💾 Gravar e Ativar Ordem de Serviço
+        </button>
+
+    </form>
+
+</div>
+
+<div class="tabela">
+
+    <h2>📋 Histórico de Ordens de Serviço</h2>
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Nº O.S.</th>
+                    <th>Data</th>
+                    <th>Veículo</th>
+                    <th>Secretaria</th>
+                    <th>Oficina</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>NF Anexada</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for item in historico %}
+
+                <tr class="{% if item.status == 'Cancelado' %}linha-cancelada{% endif %}">
+
+                    <td><strong>#{{ "%04d"|format(item.id) }}</strong></td>
+
+                    <td>{{ item.data.strftime('%d/%m/%Y') if item.data.strftime else item.data }}</td>
+
+                    <td>{{ item.veiculo }}</td>
+
+                    <td>
+                        <span class="badge bg-secondary" style="background:#64748b; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.85em;">
+                            {{ item.secretaria }}
+                        </span>
+                    </td>
+
+                    <td>{{ item.oficina }}</td>
+
+                    <td>{{ item.tipo_servico }}</td>
+
+                    <!-- Utilizando a propriedade formatada do Python -->
+                    <td><strong>{{ item.valor_formatado }}</strong></td>
+
+                    <td style="text-align: center;">
+                        {% if item.nota_fiscal %}
+                            <a href="{{ url_for('static', filename='uploads/' ~ item.nota_fiscal) }}"
+                               target="_blank"
+                               style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 1.1em;"
+                               title="Ver arquivo original anexado">
+                               📄 Ver Nota
+                            </a>
+                        {% else %}
+                            <span style="color: #94a3b8; font-style: italic;">Nenhum anexo</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <span class="{% if item.status == 'Concluído' %}ativo{% elif item.status == 'Cancelado' %}manutencao{% else %}pendente{% endif %}">
+                            {{ item.status }}
+                        </span>
+                    </td>
+
+                    <td>
+
+                        <div class="acoes-os">
+
+                            <a href="{{ url_for('imprimir_os', id=item.id) }}"
+                               target="_blank"
+                               class="btn-acao"
+                               style="background:#3b82f6;">
+                                🖨️ Imprimir
+                            </a>
+
+                            {% if item.status == 'Em Andamento' %}
+
+                            <a href="{{ url_for('concluir_os', id=item.id) }}"
+                               class="btn-acao"
+                               style="background:#10b981;">
+                                ✅ Concluir
+                            </a>
+
+                            <a href="{{ url_for('cancelar_os', id=item.id) }}"
+                               class="btn-acao"
+                               style="background:#f59e0b;"
+                               onclick="return confirm('Deseja realmente suspender esta O.S.?')">
+                                🛑 Cancelar
+                            </a>
+
+                            {% endif %}
+
+                            <a href="{{ url_for('excluir_os', id=item.id) }}"
+                               class="btn-acao"
+                               style="background:#ef4444;"
+                               onclick="return confirm('Remover permanentemente do registro?')">
+                                🗑️ Excluir
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">
+                        Nenhuma ordem de serviço registrada.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- COMPORTAMENTO INTERATIVO DO COMPONENTE DE BUSCA -->
+<script>
+function mostrarOpcoes() {
+    document.getElementById('lista-veiculos-dropdown').style.display = 'block';
+}
+
+function filtrarVeiculos() {
+    let input = document.getElementById('busca-veiculo').value.toLowerCase();
+    let opcoes = document.querySelectorAll('.opcao-veiculo');
+    let lista = document.getElementById('lista-veiculos-dropdown');
+
+    lista.style.display = 'block';
+
+    opcoes.forEach(opcao => {
+        let texto = opcao.innerText.toLowerCase();
+        if (texto.includes(input)) {
+            opcao.style.display = 'flex';
+        } else {
+            opcao.style.display = 'none';
+        }
+    });
+}
+
+function selecionarVeiculo(valorOriginal, valorCurto) {
+    // Exibe o modelo completo com a placa limpa no campo visual do usuário
+    document.getElementById('busca-veiculo').value = valorCurto;
+    // Passa a string completa de volta pro Flask realizar a extração via split('(')
+    document.getElementById('veiculo-selecionado-real').value = valorOriginal;
+    // Oculta o dropdown imediatamente após clicar
+    document.getElementById('lista-veiculos-dropdown').style.display = 'none';
+}
+
+// Fecha a lista ao clicar fora do componente de input ou da lista
+document.addEventListener('click', function(e) {
+    let inputBusca = document.getElementById('busca-veiculo');
+    let lista = document.getElementById('lista-veiculos-dropdown');
+    if (inputBusca && lista) {
+        if (e.target !== inputBusca && !lista.contains(e.target)) {
+            lista.style.display = 'none';
+        }
+    }
+});
+
+// Estilos de foco visual nos itens internos do dropdown customizado
+document.querySelectorAll('.opcao-veiculo').forEach(opt => {
+    opt.addEventListener('mouseenter', () => {
+        opt.style.backgroundColor = 'var(--hover-color, #f8fafc)';
+    });
+    opt.addEventListener('mouseleave', () => {
+        opt.style.backgroundColor = 'transparent';
+    });
+});
+
+function escolherRelatorio(){
+    let opcao = prompt(
+`Qual relatório deseja emitir?
+
+1 - Manutenções
+2 - Serviços
+3 - Geral`);
+
+    if(opcao=="1"){
+        window.location.href="/relatorio_geral?tipo=manutencao";
+    }
+    else if(opcao=="2"){
+        window.location.href="/relatorio_geral?tipo=servico";
+    }
+    else if(opcao=="3"){
+        window.location.href="/relatorio_geral?tipo=geral";
+    }
+}
+</script>
+
+{% endblock %}

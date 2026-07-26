@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Posto Conveniado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <div class="login-left">
+        <div class="login-box">
+            <h1>Sistema do Posto</h1>
+            <p class="subtitulo">Área de Lançamento de Abastecimento</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/posto/login">
+                <input type="text" name="usuario" placeholder="Usuário do Posto" required autocomplete="off">
+                <input type="password" name="senha" placeholder="Senha do Posto" required>
+                <button type="submit" style="background-color: #0284c7;">Acessar Sistema</button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="/login" style="color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 600;">
+                    ⬅ Voltar para o Painel Geral
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-right"></div>
+
+</div>
+
+</body>
+</html>

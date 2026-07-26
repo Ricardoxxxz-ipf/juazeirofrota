@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Frotas</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* Variáveis de tema para suportar os componentes interativos de busca */
+        :root {
+            --bg-card: #ffffff;
+            --text-color: #1e293b;
+            --hover-color: #f8fafc;
+            --border-color: #cbd5e1;
+        }
+
+        body.dark {
+            --bg-card: #111827;
+            --text-color: #f8fafc;
+            --hover-color: #1f2937;
+            --border-color: #374151;
+        }
+
+        /* Ajuste estrutural do fundo principal e container */
+        body.dark, body.dark .main {
+            background-color: #0b0f19 !important;
+            color: #f8fafc !important;
+        }
+
+        /* Força os blocos brancos (Topbar, Formulários, Cards) a escurecer */
+        body.dark .topbar,
+        body.dark .card,
+        body.dark .tabela,
+        body.dark .form-cadastro,
+        body.dark .table-container,
+        body.dark table,
+        body.dark div[style*="background:#fff"],
+        body.dark div[style*="background: #fff"],
+        body.dark div[style*="background:white"],
+        body.dark div[style*="background-color:#fff"],
+        body.dark div[style*="background-color: #fff"] {
+            background-color: var(--bg-card) !important;
+            color: var(--text-color) !important;
+            border-color: var(--border-color) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        /* Correção dos cabeçalhos das tabelas (Th) */
+        body.dark th {
+            background-color: #1f2937 !important;
+            color: #38bdf8 !important; /* Azul claro de destaque */
+            border-bottom: 2px solid #374151 !important;
+        }
+
+        /* Correção das linhas das tabelas (Td) */
+        body.dark td {
+            background-color: #111827 !important;
+            color: #e2e8f0 !important;
+            border-bottom: 1px solid #1f2937 !important;
+        }
+
+        /* Evita que as linhas sumam ou fiquem brancas no hover */
+        body.dark tr:hover td {
+            background-color: #1f2937 !important;
+        }
+
+        /* Ajuste de todos os textos para evitar que fiquem pretos ou sumam */
+        body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark strong {
+            color: #ffffff !important;
+        }
+
+        body.dark p, body.dark small, body.dark span:not([style*="color"]) {
+            color: #94a3b8 !important;
+        }
+
+        /* Manter os textos dos indicadores grandes legíveis */
+        body.dark .numero, body.dark [style*="color: #1e293b"], body.dark [style*="color:#1e293b"] {
+            color: #38bdf8 !important;
+        }
+
+        /* Correção específica para avisos de "Nenhum registro encontrado" em itálico */
+        body.dark td[style*="color:#94a3b8"],
+        body.dark td[style*="color: #94a3b8"] {
+            color: #64748b !important;
+            background-color: #111827 !important;
+        }
+
+        /* Ajuste nos botões de abas que não estão ativos para não sumirem */
+        body.dark .btn-aba:not(.active) {
+            background-color: #1f2937 !important;
+            color: #94a3b8 !important;
+        }
+
+        /* Ajuste global para inputs e selects no modo escuro */
+        body.dark input, body.dark select, body.dark textarea {
+            background-color: #1f2937 !important;
+            color: #ffffff !important;
+            border-color: #374151 !important;
+        }
+    </style>
+</head>
+
+<body class="{% if tema == 'dark' %}dark{% endif %}">
+
+<div class="sidebar">
+
+    <div class="logo">
+        <div style="font-size:48px;">🚘</div>
+        <h2 style="margin-top:10px;">FROTAS</h2>
+        <small>Prefeitura de Juazeiro do Piauí</small>
+    </div>
+
+    <div class="menu">
+        <a href="/" class="{{ 'active' if request.path == '/' }}">
+            🏠
+            <span>Tela Inicial</span>
+        </a>
+
+        <a href="/veiculos" class="{{ 'active' if request.path == '/veiculos' }}">
+            🚘
+            <span>Veículos</span>
+        </a>
+
+        <a href="/motoristas" class="{{ 'active' if request.path == '/motoristas' }}">
+            👤
+            <span>Motoristas</span>
+        </a>
+
+        <a href="/abastecimentos" class="{{ 'active' if request.path == '/abastecimentos' }}">
+            ⛽
+            <span>Abastecimentos</span>
+        </a>
+
+        <a href="/os" class="{{ 'active' if request.path == '/os' or request.path == '/os_rota' }}">
+            📋
+            <span>Ordens de Serviço</span>
+        </a>
+
+        <a href="/oficinas" class="{{ 'active' if request.path == '/oficinas' }}">
+            🏢
+            <span>Oficinas & Lojas</span>
+        </a>
+
+        <!-- ABAS DE FATURAMENTO SEPARADAS -->
+        <a href="/faturamento" class="{{ 'active' if request.path == '/faturamento' }}">
+            🧾
+            <span>Faturamento Combustível</span>
+        </a>
+
+        <a href="/faturamento_os" class="{{ 'active' if 'faturamento_os' in request.path }}">
+            🛠️
+            <span>Faturamento O.S.</span>
+        </a>
+    </div>
+
+    <div style="margin-top:auto;padding:25px;">
+        <a href="/logout"
+           style="display:block;
+                  text-decoration:none;
+                  text-align:center;
+                  background:#dc2626;
+                  color:white;
+                  padding:12px;
+                  border-radius:10px;
+                  font-weight:bold;">
+            🚪 Encerrar Sessão
+        </a>
+    </div>
+
+</div>
+
+<div class="main">
+
+    <div class="topbar">
+        <div>
+            <h2 style="margin-bottom:4px;">
+                🏛 Prefeitura Municipal de Juazeiro do Piauí
+            </h2>
+            <p style="margin:0;opacity:.85;">
+                Sistema Integrado de Gestão de Frotas
+            </p>
+        </div>
+
+        <div> style="display:flex;align-items:center;gap:15px;">
+            <div style="text-align:right;">
+                <strong>Administrador</strong>
+                <br>
+                <small>{{ session.get('usuario_admin','Usuário') }}</small>
+            </div>
+
+            <a> href="{{ url_for('alternar_tema') }}" class="btn-tema">
+                {% if tema == 'dark' %}
+                    ☀️ Modo Claro
+                {% else %}
+                    🌙 Modo Escuro
+                {% endif %}
+            </a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block conteudo %}
+    {% endblock %}
+
+    <div style="margin-top:40px;
+                text-align:center;
+                color:#94a3b8;
+                font-size:13px;
+                padding:20px;">
+        Sistema Integrado de Gestão de Frotas • Prefeitura Municipal de Juazeiro do Piauí
+        <br>
+        Versão 1.0 • Desenvolvido por ODRAX TECH
+    </div>
+
+</div>
+
+</body>
+</html>

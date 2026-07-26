@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ordem de Serviço #{{ "%04d" | format(os.id) }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; color: #666; }
+        .info-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .info-table th, .info-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .info-table th { background-color: #f5f5f5; width: 30%; }
+        .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #888; }
+        .assinaturas { margin-top: 80px; display: flex; justify-content: space-between; }
+        .linha-assinatura { border-top: 1px solid #000; width: 40%; text-align: center; padding-top: 5px; font-size: 14px; }
+        .btn-print { background: #1e3a8a; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+
+        /* Esconde o botão de imprimir e as margens do navegador na folha impressa */
+        @media print {
+            .btn-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="btn-print" onclick="window.print()">🖨️ Emitir Cópia Impressa</button>
+
+    <div class="header">
+        <h1>Prefeitura Municipal de Juazeiro do Piauí</h1>
+        <p>Departamento de Transportes e Controle de Frotas</p>
+        <p style="font-weight: bold; margin-top: 10px; font-size: 16px;">COMPROVANTE DE ORDEM DE SERVIÇO</p>
+    </div>
+
+    <h2>Dados do Atendimento (O.S. #{{ "%04d" | format(os.id) }})</h2>
+
+    <table class="info-table">
+        <tr>
+            <th>Data de Abertura:</th>
+            <td>{{ os.data.strftime('%d/%m/%Y') }}</td>
+        </tr>
+        <tr>
+            <th>Status Atual:</th>
+            <td><strong>{{ os.status.upper() }}</strong></td>
+        </tr>
+        <tr>
+            <th>Veículo Utilizado:</th>
+            <td>{{ os.veiculo }}</td>
+        </tr>
+        <tr>
+            <th>Oficina / Estabelecimento:</th>
+            <td>{{ os.oficina }}</td>
+        </tr>
+        <tr>
+            <th>Motorista / Responsável:</th>
+            <td>{{ os.responsavel }}</td>
+        </tr>
+        <tr>
+            <th>Tipo de Serviço executado:</th>
+            <td>{{ os.tipo_servico }}</td>
+        </tr>
+        <tr>
+            <th>Valor do Serviço:</th>
+            <td><strong>{{ os.valor_formatado }}</strong></td>
+        </tr>
+    </table>
+
+    <div class="assinaturas">
+        <div class="linha-assinatura">Responsável pelo Setor de Frotas</div>
+        <div class="linha-assinatura">Motorista / Condutor</div>
+    </div>
+
+    <div class="footer">
+        <p>Documento gerado eletronicamente pelo Sistema de Gestão de Frotas de Juazeiro do Piauí.</p>
+        <p>Emitido em: {{ data_emissao.strftime('%d/%m/%Y %H:%M') if data_emissao.strftime else data_emissao }}</p>
+    </div>
+
+</body>
+</html>

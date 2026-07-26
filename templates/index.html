@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="painel-index">
+    <div class="topbar">
+        <div>
+            <h1>📊 Painel de Controle Consolidado</h1>
+            <p>Gestão integrada, indicadores e auditoria da frota municipal de Juazeiro do Piauí.</p>
+        </div>
+    </div>
+
+    <!-- Filtro de Período Personalizado -->
+    <div class="filtro-container" style="background: var(--bg-card, #ffffff); padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; border: 1px solid #e2e8f0;">
+        <form method="GET" action="/" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-weight: 600; font-size: 0.9rem; color: #475569;">De:</label>
+                <input type="date" name="data_inicio" value="{{ data_inicio or '' }}" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-weight: 600; font-size: 0.9rem; color: #475569;">Até:</label>
+                <input type="date" name="data_fim" value="{{ data_fim or '' }}" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem;">
+            </div>
+            <button type="submit" style="background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem;">
+                Filtrar Período
+            </button>
+            {% if data_inicio or data_fim %}
+                <a href="/" style="color: #64748b; font-size: 0.9rem; text-decoration: none; font-weight: 500; margin-left: 5px; border-bottom: 1px dashed #64748b;">Limpar Filtro</a>
+            {% endif %}
+        </form>
+        <div>
+            {% if data_inicio or data_fim %}
+                <span class="badge" style="background-color: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; text-transform: none;">Filtro de Data Ativo</span>
+            {% else %}
+                <span style="font-size: 0.85rem; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Auditoria Geral do Sistema</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="abas-container" style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+        <button class="btn-aba active" onclick="alternarAba(event, 'sec-prefeitura')">🏛️ Prefeitura</button>
+        <button class="btn-aba" onclick="alternarAba(event, 'sec-saude')">⚕️ Saúde</button>
+        <button class="btn-aba" onclick="alternarAba(event, 'sec-educacao')">🎓 Educação</button>
+        <button class="btn-aba" onclick="alternarAba(event, 'sec-assistencia')">🤝 Assistência Social</button>
+    </div>
+
+    <style>
+        .btn-aba { padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+        .btn-aba:hover { background: #cbd5e1; color: #1e293b; }
+        .btn-aba.active { background: #1e293b; color: white; }
+        .conteudo-aba { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .conteudo-aba.active { display: block; }
+        .grid-duplo { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .badge.pendente { background-color: #fef3c7; color: #d97706; }
+        .badge.ativo { background-color: #d1fae5; color: #065f46; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    {% macro render_aba(id_aba, nome_secretaria, active=false) %}
+
+    <div id="{{ id_aba }}" class="conteudo-aba {% if active %}active{% endif %}">
+        <div class="cards">
+            <div class="card">
+                <h2>Abastecimentos {% if data_inicio or data_fim %}(No Período){% else %}(Mês Atual){% endif %}</h2>
+                <div class="numero" style="color: #0284c7;">
+                    {{ resumo_secretarias[nome_secretaria]['combustivel'] if resumo_secretarias is defined else 'R$ 0,00' }}
+                </div>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 5px; font-weight: bold;">
+                    {{ resumo_secretarias[nome_secretaria]['qtd_abast'] if resumo_secretarias is defined else 0 }} abastecimentos realizados
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Total de O.S. (Geral)</h2>
+                <div class="numero" style="color: #f59e0b;">
+                    {{ resumo_secretarias[nome_secretaria]['valor_os'] if resumo_secretarias is defined else 'R$ 0,00' }}
+                </div>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 5px; font-weight: bold;">
+                    {{ resumo_secretarias[nome_secretaria]['os_ativas'] if resumo_secretarias is defined else 0 }} O.S. emitidas
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-duplo">
+            <div class="tabela">
+                <h2>⛽ Últimos Abastecimentos</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cupom</th>
+                                <th>Veículo</th>
+                                <th>Motorista</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in abastecimentos if item.secretaria == nome_secretaria %}
+                            <tr>
+                                <td>#{{ "%04d"|format(item.id) }}</td>
+                                <td>{{ item.veiculo }}</td>
+                                <td>{{ item.motorista }}</td>
+                                <td><strong>{{ item.valor_total_formatado }}</strong></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:20px; font-style:italic;">Nenhum abastecimento recente no período filtrado.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tabela">
+                <h2>🛠️ Ordens de Serviço Recentes</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nº O.S.</th>
+                                <th>Veículo</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set ns = namespace(contador=0) %}
+                            {% for item in ordens_servico if item.secretaria == nome_secretaria %}
+                                {% set ns.contador = ns.contador + 1 %}
+                                <tr> style="{% if item.status == 'Estornado' %}color: #94a3b8; background-color: #f8fafc; font-style: italic;{% endif %}">
+                                    <td>#{{ "%04d"|format(item.id) }}</td>
+                                    <td>{{ item.veiculo }}</td>
+                                    <td>{{ item.tipo_servico }}</td>
+                                    <td><strong>{{ item.valor_formatado }}</strong></td>
+                                    <td><span class="badge {% if item.status == 'Concluído' %}ativo{% else %}pendente{% endif %}">{{ item.status }}</span></td>
+                                </tr>
+                            {% endfor %}
+
+                            {% if ns.contador == 0 %}
+                            <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px; font-style:italic;">Nenhuma O.S. registrada no período.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endmacro %}
+
+    {{ render_aba('sec-prefeitura', 'Prefeitura', active=true) }}
+    {{ render_aba('sec-saude', 'Saúde') }}
+    {{ render_aba('sec-educacao', 'Educação') }}
+    {{ render_aba('sec-assistencia', 'Assistência Social') }}
+
+</div>
+
+<script>
+function alternarAba(evt, nomeAba) {
+    let conteudos = document.getElementsByClassName("conteudo-aba");
+    for (let i = 0; i < conteudos.length; i++) {
+        conteudos[i].classList.remove("active");
+    }
+    let botoes = document.getElementsByClassName("btn-aba");
+    for (let i = 0; i < botoes.length; i++) {
+        botoes[i].classList.remove("active");
+    }
+    document.getElementById(nomeAba).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+</script>
+
+{% endblock %}

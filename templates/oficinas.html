@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Oficinas & Lojas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .form-control {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
+        .form-control:focus {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-color: #38bdf8;
+            color: #f8fafc;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        }
+        .btn-primary {
+            background-color: #38bdf8;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0284c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">🏢 Lojas de Peças & Oficinas</h1>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm">Voltar ao Início</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h5 class="mb-3">Nova Loja/Oficina</h5>
+                    <form action="{{ url_for('cadastrar_oficina') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Nome Fantasia</label>
+                            <input type="text" name="nome" class="form-control" placeholder="Ex: Erinaldo Auto Peças" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">CNPJ (Opcional)</label>
+                            <input type="text" name="cnpj" class="form-control" placeholder="00.000.000/0001-00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Telefone (Opcional)</label>
+                            <input type="text" name="telefone" class="form-control" placeholder="(86) 99999-9999">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="glass-card">
+                    <h5 class="mb-3">Lojas Cadastradas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>CNPJ</th>
+                                    <th>Telefone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for oficina in oficinas %}
+                                <tr>
+                                    <td>#{{ "%02d"|format(oficina.id) }}</td>
+                                    <td class="fw-bold">{{ oficina.nome }}</td>
+                                    <td>{{ oficina.cnpj or 'Não informado' }}</td>
+                                    <td>{{ oficina.telefone or 'Não informado' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Nenhuma loja cadastrada ainda.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
