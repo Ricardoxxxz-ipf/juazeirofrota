@@ -952,3 +952,27 @@ body.dark-mode .card small{
     display:inline-flex;
     margin:3px;
 }
+
+/* ===========================================================
+   RESPONSIVIDADE PARA CELULARES (TELA DE LOGIN)
+=========================================================== */
+@media (max-width: 768px) {
+    .login-page {
+        flex-direction: column;
+    }
+
+    .login-left {
+        width: 100%;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .login-right {
+        display: none; /* Oculta a imagem pesada no celular para focar no login limpo */
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 400px;
+    }
+}
