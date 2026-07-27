@@ -696,7 +696,7 @@ def lancar_abastecimento():
     veic_list = [f"{v.modelo} ({v.placa}) - {v.secretaria}" for v in
                  db.session.scalars(db.select(Veiculo).filter_by(status='Ativo')).all()]
 
-    return render_template('lancar_abastecimento.html', veiculos=veic_list)
+    return render_template('posto_abastecer.html', veiculos=veic_list)
 
 
 @app.route('/posto/nota/<int:id>')
