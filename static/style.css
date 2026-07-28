@@ -956,7 +956,6 @@ body.dark-mode .card small{
 /* ===========================================================
    RESPONSIVIDADE COMPLETA PARA CELULARES
 =========================================================== */
-
 /* 1. Ajuste para a Tela de Login */
 @media (max-width: 768px) {
     .login-page {

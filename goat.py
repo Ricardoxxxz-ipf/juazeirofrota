@@ -692,12 +692,31 @@ def lancar_abastecimento():
         db.session.commit()
         flash('Cupom de Abastecimento emitido e gravado!', 'success')
         return redirect(url_for('lancar_abastecimento'))
+    veic_list = [
+        f"{v.modelo} ({v.placa}) - {v.secretaria}"
+        for v in db.session.scalars(
+            db.select(Veiculo).filter_by(status='Ativo')
+        ).all()
+    ]
 
-    veic_list = [f"{v.modelo} ({v.placa}) - {v.secretaria}" for v in
-                 db.session.scalars(db.select(Veiculo).filter_by(status='Ativo')).all()]
+    motoristas = [
+        m.nome
+        for m in db.session.scalars(
+            db.select(Motorista).order_by(Motorista.nome)
+        ).all()
+    ]
 
-    return render_template('posto_abastecer.html', veiculos=veic_list)
+    historico = db.session.scalars(
+        db.select(Abastecimento)
+        .order_by(Abastecimento.data.desc())
+    ).all()
 
+    return render_template(
+        'posto_abastecer.html',
+        veiculos=veic_list,
+        motoristas=motoristas,
+        historico=historico
+    )
 
 @app.route('/posto/nota/<int:id>')
 def nota_abastecimento(id):
