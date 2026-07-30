@@ -635,15 +635,10 @@ tbody tr:hover{
 }
 
 .login-right{
-
     width:55%;
-
     background:url("/static/new_logo_prefeitura.png") center center;
-
     background-size:cover;
-
     background-repeat:no-repeat;
-
 }
 
 .login-box{
